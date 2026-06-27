@@ -1,0 +1,68 @@
+{
+  "objective": "Improve correctness and reliability. Reproduce concrete failures, preserve public behavior, add regression tests, and prefer focused changes over cosmetic rewrites.",
+  "model": {
+    "provider": "same-session",
+    "model": "",
+    "command": "",
+    "timeout": 900,
+    "temperature": 0.1,
+    "max_tokens": 16384
+  },
+  "search": {
+    "strategy": "adaptive",
+    "initial_candidates": 1,
+    "max_candidates": 8,
+    "candidates": 4,
+    "parallel_candidates": 4,
+    "max_generations": 0,
+    "patience": 4,
+    "max_actions": 100,
+    "max_invalid_responses": 4,
+    "ignore_done": false,
+    "require_measurable_improvement": false
+  },
+  "snapshot": {
+    "mode": "reflink",
+    "excludes": [
+      ".git",
+      "node_modules",
+      "__pycache__",
+      ".pytest_cache",
+      ".mypy_cache",
+      ".ruff_cache",
+      ".recursive-self-improvement"
+    ],
+    "keep_candidates": false
+  },
+  "limits": {
+    "inventory_depth": 3,
+    "inventory_entries": 0,
+    "read_bytes": 0,
+    "tool_output_bytes": 0,
+    "search_matches": 0,
+    "conversation_chars": 0
+  },
+  "tests": [
+    {
+      "name": "unit",
+      "command": "python3 -m pytest -q",
+      "timeout": 900
+    }
+  ],
+  "metrics": [
+    {
+      "name": "benchmark",
+      "command": "python3 benchmarks/score.py",
+      "direction": "higher",
+      "weight": 1.0,
+      "timeout": 900
+    }
+  ],
+  "protected_paths": [
+    "external-evaluator"
+  ],
+  "auto_discover_tests": true,
+  "test_timeout": 900,
+  "command_timeout": 900,
+  "verbose": false
+}
