@@ -1,23 +1,36 @@
 # Recursive Self-Improvement
 
-Recursive Self-Improvement is a Codex/agent skill for improving a codebase,
-prompt, test, or skill in the current loaded session. The agent that loads the
-skill is the controller, candidate generator, evaluator, and promoter.
+Recursive Self-Improvement is an agent skill for improving code, prompts, tests,
+or skills inside the current loaded session. The same agent that loads the skill
+acts as controller, candidate generator, evaluator, and promoter.
 
-It must not launch a fresh Claude Code or Codex session.
+It is intentionally conservative: no child model process gets to generate,
+evaluate, and promote its own work.
 
 ## Hard Boundary
 
-Forbidden active paths:
+Do not launch a fresh Claude Code, Codex, or other model session from this
+skill. These paths are forbidden as active improvement loops:
 
-- `claude`, `claude -p`, or Claude Code subprocesses
+- `claude` or `claude -p`
 - `codex exec` or nested Codex subprocesses
-- autonomous use of `scripts/cli_model_adapter.py`
-- autonomous use of `scripts/recursive_self_improve.py`
-- `scripts/supervisor.py` as a cross-generation child-process controller
+- `scripts/cli_model_adapter.py`
+- `scripts/recursive_self_improve.py` as an autonomous controller
+- `scripts/supervisor.py` as a cross-generation process controller
 
-Those launcher surfaces remain only as inert legacy compatibility files or
-historical reference points. The active runtime contract is `SKILL.md`.
+The Python controller files remain in the package as reference and regression
+fixtures. The active public contract is `SKILL.md`: improve in the current
+session and verify in the real workspace.
+
+## Use It When
+
+- A user asks for iterative improvement rather than a one-shot edit.
+- A prompt, skill, benchmark, or test needs one measurable improvement at a
+  time.
+- Several candidate fixes are possible, but only verified workspace changes
+  should survive.
+- A previous "self-improvement" loop relied on process transcripts, model
+  claims, or no-diff scores instead of actual changes and checks.
 
 ## Same-Session Loop
 
@@ -31,60 +44,47 @@ state objective and trusted checks
 -> record evidence and the next generation target
 ```
 
-Best-of-N can be done as a reasoning exercise by the current agent. Isolated
-worktrees or subagents are allowed only when the user explicitly authorizes them
-for the current task; they do not replace current-session promotion and
-verification.
+Protected paths matter. Before editing, name the evaluator assets that candidate
+changes must not mutate: scoring scripts, benchmark fixtures, gate tests,
+validation scripts, or any other surface that would let the candidate grade
+itself.
 
-## How It Works With The Other Two Skills
+## What The Package Includes
 
-These three skills are useful independently:
+- `SKILL.md` - the active same-session discipline.
+- `references/protocol.md` - longer protocol notes.
+- `rsi/` - deterministic evaluator, diff, rollback, and scoring experiments
+  retained as reference material.
+- `scripts/self_test.py` - regression suite for evaluator behavior, rollback,
+  adaptive selection, and the no-child-session boundary.
+- `install.sh` - copies the package into a chosen skill directory.
 
-- `fable-method`: locks and verifies the engineering slice
-- `evaluate-by-experiment`: tests a contestable claim with a falsifiable setup
-- `recursive-self-improvement`: iterates one verified improvement in the
-  current session without spawning child model sessions
-
-They also compose well:
-
-```text
-Fable Method sets the target, non-goals, and proof gate.
-Evaluate by Experiment tests whether the proposed improvement actually works.
-Recursive Self-Improvement applies one verified improvement and repeats only
-when another trusted check can measure the next step.
-```
-
-The composition is intentionally conservative: no child session can promote its
-own work, no metric counts without a real check, and no iteration is successful
-without a diff and verification in the current workspace.
-
-## Install
+## Install As An Agent Skill
 
 ```bash
-./install.sh /path/to/skills
+git clone https://github.com/ap7x42a/recursive-self-improvement.git
+cd recursive-self-improvement
+./install.sh ~/.codex/skills
 ```
 
-This creates:
+The install script creates:
 
 ```text
-/path/to/skills/recursive-self-improvement
+~/.codex/skills/recursive-self-improvement
 ```
 
 No third-party Python package is required.
 
-## Verify
+## Verify The Package
 
 ```bash
 python3 scripts/self_test.py
 sha256sum -c SHA256SUMS.txt
 ```
 
-The suite verifies evaluator behavior, rollback behavior, adaptive selection
-with an in-process deterministic model stub, and the no-child-session contract.
+## Limits
 
-## Status Of The Python Package
-
-The `rsi/` modules contain deterministic evaluator, diff, rollback, and scoring
-experiments from the original standalone controller. They are reference material
-unless the current task explicitly asks to repair that package. Any path that
-would launch a child model session fails closed and points back to `SKILL.md`.
+This package does not provide an autonomous research agent or background
+controller. It is a discipline for one loaded agent to make one verifiable
+improvement at a time, reject weak candidates, and keep only changes backed by
+trusted checks.
