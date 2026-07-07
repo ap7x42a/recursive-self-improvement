@@ -1,0 +1,4 @@
+interface:
+  display_name: "Recursive Self Improvement"
+  short_description: "Same-session recursive improvement loop for concrete repair and implementation work."
+  default_prompt: "Use Recursive Self Improvement only as a same-session loop: current agent proposes, verifies, promotes, or rejects candidate changes without launching child Claude or Codex sessions."
